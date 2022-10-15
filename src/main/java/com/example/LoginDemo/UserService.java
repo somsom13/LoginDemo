@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -22,6 +24,21 @@ public class UserService {
 
     public User findUserByEmail(String email){
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    public User findUserByNickname(String nickname){
+        return userRepository.findByNickname(nickname).orElse(null);
+    }
+
+    public void join(JoinDto joinDto){
+        User user = User.builder()
+                .name(joinDto.getName())
+                .email(joinDto.getEmail())
+                .nickname(joinDto.getNickname())
+                .pwd(bCryptPasswordEncoder.encode(joinDto.getPwd()))
+                .time(LocalDateTime.now())
+                .build();
+        userRepository.save(user);
     }
 
 }

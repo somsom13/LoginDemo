@@ -18,4 +18,16 @@ public class UserController {
         return user==null?304:200;
     }
 
+    @PostMapping("/join")
+    public int Join(@RequestBody JoinDto joinDto){
+        if(userService.findUserByEmail(joinDto.getEmail())!=null){
+            return 409;
+        }
+        if(userService.findUserByNickname(joinDto.getNickname())!=null){
+            return 409;
+        }
+        userService.join(joinDto);
+        return 201;
+    }
+
 }
