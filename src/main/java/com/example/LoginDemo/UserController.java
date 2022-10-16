@@ -1,6 +1,7 @@
 package com.example.LoginDemo;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,12 +10,14 @@ import javax.servlet.http.HttpSession;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
     private final UserService userService;
 
     @PostMapping("/login")
     public int Login(@RequestBody LoginDto loginDto, HttpServletRequest request){
         User user = userService.authenticateLogin(loginDto,request);
+        log.info("login success");
         return user==null?304:200;
     }
 
