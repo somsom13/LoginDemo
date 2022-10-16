@@ -1,21 +1,32 @@
 package com.example.LoginDemo;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private UserRepository userRepository;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public User authenticateLogin(LoginDto loginDto){
+    public UserService(UserRepository userRepository, @Lazy BCryptPasswordEncoder bCryptPasswordEncoder){
+        this.userRepository=userRepository;
+        this.bCryptPasswordEncoder=bCryptPasswordEncoder;
+    }
+
+    public User authenticateLogin(LoginDto loginDto,HttpServletRequest request){
         User user = findUserByEmail(loginDto.getEmail());
         if(user!=null){
             if(bCryptPasswordEncoder.matches(loginDto.getPassword(),user.getPassword())){
+                createSession(user,request);
                 return user;
             }
         }
@@ -41,4 +52,9 @@ public class UserService {
         userRepository.save(user);
     }
 
+    private void createSession(User user, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        session.setAttribute("user",new SessionUser(user));
+        session.setMaxInactiveInterval(2*60*60); //2시간 제한 시간
+    }
 }
